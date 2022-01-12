@@ -1,3 +1,4 @@
+#wip
 import pyaudio
 import wave
 import numpy as np
@@ -7,6 +8,7 @@ RATE = 48000
 CHANNELS=1
 FORMAT=pyaudio.paInt16
 FRAMES=1024
+CONCERT_PITCH = 440
 
 filename = "sick-tune-bro.wav"
 
@@ -17,6 +19,21 @@ stream = pa.open(
     frames_per_buffer=FRAMES,
     input=True
 )
+
+
+
+# 12 * log2(fi/f0)=i ;; formula to find how many half steps between fi and f0
+
+notes = ["A","A#","B","C","C#","D","D#","E","F","F#","G","G#"]
+def find_closest_note(pitch):
+    if pitch == 0:
+        return 0, 0
+    else:
+        i = int(np.round(12 * np.log2(pitch/CONCERT_PITCH)))
+        closest_pitch = CONCERT_PITCH*2**(i/12)
+        closest_note = notes[i%12] + str(4 + (i + 9) // 12)
+        return closest_note, closest_pitch
+
 
 
 # continuous recording until program exits
@@ -36,6 +53,13 @@ try:
         freq_in_hertz = abs(freq * RATE)
 
         print(f"hertz: {freq_in_hertz}")
+
+        note, pitch = find_closest_note(freq_in_hertz)
+        print(f"note: {note}")
+        print(f"pitch: {pitch}")
+
+
+
 
   
 except KeyboardInterrupt:
